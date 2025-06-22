@@ -1,0 +1,10 @@
+{
+  "block.tutorial-mod.ice_ether_block": "Ice Ether Block",
+  "item.tutorial-mod.working_table_passport": "Ice Ether",
+  "itemGroup.tutorial_group": "Tutorial Mod",
+  "key.tutorial-mod.open_task_gui": "open_task_gui",
+  "key.tutorial-mod.task": "task_button",
+  "key.tutorial-mod.open_bribery_apply_gui": "key.tutorial-mod.open_bribery_apply_gui",
+  "key.tutorial-mod.apply": "key.tutorial-mod.apply",
+  "key.tutorial-mod.open_bribery_task_gui": "key.tutorial-mod.open_bribery_task_gui"
+}

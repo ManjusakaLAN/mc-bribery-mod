@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "com.manjusaka.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "CraftingScreenHandlerMixin",
+    "PlayerEntityMixin",
+    "SlotMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+
+  ]
+}
