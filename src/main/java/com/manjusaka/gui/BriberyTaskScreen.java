@@ -38,16 +38,14 @@ public class BriberyTaskScreen extends Screen {
         for (BriberyTaskInfo briberyTaskInfo :briberyTaskInfoList) {
 
             ButtonWidget buttonWidgetAgree = ButtonWidget.builder(Text.of("Agree"), (btn) -> {
-                // When the button is clicked, we can display a toast to the screen.
-                assert this.client != null;
                 MinecraftClient.getInstance().execute(() -> {
-                    MinecraftClient.getInstance().setScreen(new CheckBoxScreen((Text.literal("check box")), this, briberyTaskInfo));
+                    MinecraftClient.getInstance().setScreen(new CheckBoxScreen((Text.literal("check box")), this, briberyTaskInfo, true));
                 });
             }).dimensions(0, 0, 40, 20).build();
             ButtonWidget buttonWidgetRefuse = ButtonWidget.builder(Text.of("Refuse"), (btn) -> {
                 MinecraftClient.getInstance().execute(() -> {
                     MinecraftClient.getInstance().execute(() -> {
-                        MinecraftClient.getInstance().setScreen(new CheckBoxScreen((Text.literal("check box")), this,briberyTaskInfo));
+                        MinecraftClient.getInstance().setScreen(new CheckBoxScreen((Text.literal("check box")), this,briberyTaskInfo,false));
                     });
                 });
             }).dimensions(0, 0, 40, 20).build();

@@ -1,27 +1,37 @@
 package com.manjusaka.network;
 
 import com.google.gson.Gson;
+import com.manjusaka.constants.CoreConstant;
+import com.manjusaka.constants.TreeBlockEnum;
 import com.manjusaka.datapersist.BriberyTaskInfoData;
 import com.manjusaka.datapersist.PlayerInfoData;
 import com.manjusaka.datapersist.model.BriberyTaskInfo;
+import com.manjusaka.datapersist.model.PlayerInfo;
 import com.manjusaka.item.ModItems;
 import com.mojang.brigadier.Command;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.manjusaka.network.NetworkingBindingID.*;
 
 public class ServerNetworkRegister {
+
+    private static final Logger log = LoggerFactory.getLogger(ServerNetworkRegister.class);
 
     public static void serverRegister() {
         serverOfficialNetRegister();
@@ -35,13 +45,39 @@ public class ServerNetworkRegister {
         // 服务端监听客户端请求
         ServerPlayNetworking.registerGlobalReceiver(REQUEST_BRIBERY_TASK_HANDLE_ID, (server, player, handler, buf, responseSender) -> {
 
-            String uuid = buf.readString();
-            System.out.println("Received request from " + player.getName().getString() + ": " + uuid);
+            String briberyTask = buf.readString();
+
+            Gson gson = new Gson();
+            BriberyTaskInfo briberyTaskInfo = gson.fromJson(briberyTask, BriberyTaskInfo.class);
+            log.info("Received request from " + player.getName().getString() + ": " + briberyTask);
+
             server.execute(() -> {
                 // 获取服务端世界和数据
                 ServerWorld world = server.getWorld(World.OVERWORLD);
-                ServerPlayerEntity applicantPlayer = server.getPlayerManager().getPlayer(UUID.fromString(uuid));
-                player.giveItemStack(new ItemStack(ModItems.WORKING_TABLE_PASSPORT));
+                if(world != null){
+                   if(briberyTaskInfo.isAccepted){
+                       ServerPlayerEntity applicantPlayer = server.getPlayerManager().getPlayer(UUID.fromString(briberyTaskInfo.applicantUuid));
+                       int i = new Random().nextInt(100);
+                       if(i < 50){// 接受有一定概率成功
+                           if(applicantPlayer != null){
+                               applicantPlayer.giveItemStack(new ItemStack(ModItems.WORKING_TABLE_PASSPORT,briberyTaskInfo.briberyNum / CoreConstant.briberyNumStep));
+                           }else {
+                               PlayerInfoData playerInfoData = PlayerInfoData.get(world);
+                               PlayerInfo playerInfo = playerInfoData.getPlayerRole(UUID.fromString(briberyTaskInfo.applicantUuid));
+                               playerInfo.setOfflinePermits(playerInfo.getOfflinePermits() + (briberyTaskInfo.briberyNum / CoreConstant.briberyNumStep));
+                               playerInfoData.updatePlayerRole(UUID.fromString(briberyTaskInfo.applicantUuid), playerInfo);
+                           }
+                       }
+                   }
+                   // 记录任务 处理日志信息
+
+                    BriberyTaskInfoData briberyTaskInfoData = BriberyTaskInfoData.get(world);
+
+                    briberyTaskInfoData.removeTask(UUID.fromString(briberyTaskInfo.officialUuid), briberyTaskInfo);
+                    log.info("{}",briberyTaskInfoData.officialTask);
+                    world.getPersistentStateManager().save();
+                }
+
             });
         });
     }
@@ -51,15 +87,41 @@ public class ServerNetworkRegister {
         ServerPlayNetworking.registerGlobalReceiver(REQUEST_BRIBERY_APPLY_ID, (server, player, handler, buf, responseSender) -> {
 
             String jsonBriberyTaskInfo = buf.readString();
+
             server.execute(() -> {
                 // 获取服务端世界和数据
                 ServerWorld world = server.getWorld(World.OVERWORLD);
                 if (world != null) {
                     Gson gson = new Gson();
                     BriberyTaskInfo briberyTaskInfo = gson.fromJson(jsonBriberyTaskInfo, BriberyTaskInfo.class);
+
+                    int decreaseTreeBlockNum = briberyTaskInfo.briberyNum;
+                    PlayerInventory inventory = player.getInventory();
+                    List<String> allTreeBlocks = TreeBlockEnum.getAllTreeBlocks();
+                    for (int i = 0; i < 36; i++) {
+                        ItemStack itemStack = inventory.getStack(i);
+                        if (!itemStack.isEmpty()) {
+                            String itemName = itemStack.getItem().getName().getString();
+                            int itemCount = itemStack.getCount();
+                            if (allTreeBlocks.contains(Registries.ITEM.getId(itemStack.getItem()).toString())) {
+                                // 数量小于需要减少的数量
+                                if (decreaseTreeBlockNum <= itemCount) {
+                                    itemStack.decrement(decreaseTreeBlockNum);
+                                } else {
+                                    itemStack.decrement(itemCount);
+                                    decreaseTreeBlockNum -= itemCount;
+                                }
+                            }
+                        }
+                        if (decreaseTreeBlockNum == 0) {
+                            break;
+                        }
+                    }
+
                     if (briberyTaskInfo.briberyNum > 0) {
                         BriberyTaskInfoData briberyTaskInfoData = BriberyTaskInfoData.get(world);
                         briberyTaskInfoData.submitTask(UUID.fromString(briberyTaskInfo.officialUuid), briberyTaskInfo);
+                        world.getPersistentStateManager().save();
                     }
                 }
             });

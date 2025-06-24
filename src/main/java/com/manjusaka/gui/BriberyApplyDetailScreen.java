@@ -1,6 +1,7 @@
 package com.manjusaka.gui;
 
 import com.google.gson.Gson;
+import com.manjusaka.constants.CoreConstant;
 import com.manjusaka.constants.TreeBlockEnum;
 import com.manjusaka.datapersist.model.BriberyTaskInfo;
 import com.manjusaka.network.NetworkingBindingID;
@@ -29,7 +30,7 @@ public class BriberyApplyDetailScreen extends Screen {
     // 当前选择贿赂的数量
     int briberyNum;
     // 每次增加减少 贿赂数量的步长
-    private static final int briberyNumStep = 3;
+    private static final int briberyNumStep = CoreConstant.briberyNumStep;
     String officialUuid;
 
     protected BriberyApplyDetailScreen(Text title, Screen parent,String officialUuid) {
@@ -78,32 +79,34 @@ public class BriberyApplyDetailScreen extends Screen {
 
         ButtonWidget buttonWidgetAgree = ButtonWidget.builder(Text.of("⭕"), (btn) -> {
 
-            int decreaseTreeBlockNum = briberyNum;
+
 
             ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
             if (player != null) {
-                PlayerInventory inventory = MinecraftClient.getInstance().player.getInventory();
-                List<String> allTreeBlocks = TreeBlockEnum.getAllTreeBlocks();
-                for (int i = 0; i < 36; i++) {
-                    ItemStack itemStack = inventory.getStack(i);
-                    if (!itemStack.isEmpty()) {
-                        String itemName = itemStack.getItem().getName().getString();
-                        int itemCount = itemStack.getCount();
-                        if (allTreeBlocks.contains(Registries.ITEM.getId(itemStack.getItem()).toString())) {
-                            // 数量小于需要减少的数量
-                            if (decreaseTreeBlockNum <= itemCount) {
-                                itemStack.decrement(decreaseTreeBlockNum);
-                            } else {
-                                itemStack.decrement(itemCount);
-                                decreaseTreeBlockNum -= itemCount;
-                            }
-                        }
-                    }
-                    if (decreaseTreeBlockNum == 0) {
-                        break;
-                    }
-                }
+//                int decreaseTreeBlockNum = briberyNum;
+//                PlayerInventory inventory = MinecraftClient.getInstance().player.getInventory();
+//                List<String> allTreeBlocks = TreeBlockEnum.getAllTreeBlocks();
+//                for (int i = 0; i < 36; i++) {
+//                    ItemStack itemStack = inventory.getStack(i);
+//                    if (!itemStack.isEmpty()) {
+//                        String itemName = itemStack.getItem().getName().getString();
+//                        int itemCount = itemStack.getCount();
+//                        if (allTreeBlocks.contains(Registries.ITEM.getId(itemStack.getItem()).toString())) {
+//                            // 数量小于需要减少的数量
+//                            if (decreaseTreeBlockNum <= itemCount) {
+//                                itemStack.decrement(decreaseTreeBlockNum);
+//                            } else {
+//                                itemStack.decrement(itemCount);
+//                                decreaseTreeBlockNum -= itemCount;
+//                            }
+//                        }
+//                    }
+//                    if (decreaseTreeBlockNum == 0) {
+//                        break;
+//                    }
+//                }
+
                 BriberyTaskInfo briberyTaskInfo = new BriberyTaskInfo(UUID.randomUUID().toString(), player.getUuidAsString(),  player.getEntityName(),briberyNum, this.officialUuid);
                 PacketByteBuf buf = PacketByteBufs.create();
                 Gson gson = new Gson();

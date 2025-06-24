@@ -16,6 +16,8 @@ public class BriberyTaskInfo {
 
     public String officialUuid;
 
+    public Boolean isAccepted;
+
     public BriberyTaskInfo(String taskUuid, String applicantUuid, String applicantName, int briberyNum,String officialUuid) {
         this.taskUuid = taskUuid;
         this.applicantUuid = applicantUuid;

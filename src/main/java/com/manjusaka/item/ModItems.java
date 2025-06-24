@@ -12,7 +12,7 @@ import net.minecraft.util.Identifier;
 
 public class ModItems {
 
-    public static final Item WORKING_TABLE_PASSPORT = registerItem("working_table_passport", new Item(new Item.Settings().maxCount(12)));
+    public static final Item WORKING_TABLE_PASSPORT = registerItem("working_table_passport", new Item(new Item.Settings().maxCount(64)));
 
     public static Item registerItem(String id, Item item) {
         return Registry.register(Registries.ITEM,RegistryKey.of(Registries.ITEM.getKey(), new Identifier(TutorialMod.MOD_ID,id)),  item);

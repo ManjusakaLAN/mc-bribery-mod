@@ -1,12 +1,10 @@
 package com.manjusaka.gui;
 
 import com.manjusaka.datapersist.model.PlayerInfo;
-import com.manjusaka.network.ClientNetworkRegister;
-import com.manjusaka.network.NetworkingBindingID;
+
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
