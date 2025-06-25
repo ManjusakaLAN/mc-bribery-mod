@@ -16,6 +16,8 @@ public class PlayerInfo {
     public int offlinePermits;
 
     public String role;
+    // 贿赂次数
+    public int briberyTimes;
     public PlayerInfo() {
     }
 
@@ -26,6 +28,7 @@ public class PlayerInfo {
         this.lastLevelCardGet = lastLevelCardGet;
         this.role = role;
         this.offlinePermits = 0;
+        this.briberyTimes = 0;
     }
 
 
@@ -77,18 +80,6 @@ public class PlayerInfo {
         this.role = role;
     }
 
-    @Override
-    public String toString() {
-        return "PlayerInfo{" +
-                "name='" + name + '\'' +
-                ", uuid='" + uuid + '\'' +
-                ", level=" + level +
-                ", lastLevelCardGet=" + lastLevelCardGet +
-                ", offlinePermits=" + offlinePermits +
-                ", role='" + role + '\'' +
-                '}';
-    }
-
     // 序列化
     public NbtCompound toNbt() {
         NbtCompound nbt = new NbtCompound();
@@ -98,6 +89,7 @@ public class PlayerInfo {
         nbt.putInt("lastLevelCardGet", this.lastLevelCardGet);
         nbt.putString("role", this.role);
         nbt.putInt("offlinePermits", this.offlinePermits);
+        nbt.putInt("briberyTimes", this.briberyTimes);
         return nbt;
     }
 
@@ -110,6 +102,7 @@ public class PlayerInfo {
         info.lastLevelCardGet = nbt.getInt("lastLevelCardGet");
         info.role = nbt.getString("role");
         info.offlinePermits = nbt.getInt("offlinePermits");
+        info.briberyTimes = nbt.getInt("briberyTimes");
         return info;
     }
 }

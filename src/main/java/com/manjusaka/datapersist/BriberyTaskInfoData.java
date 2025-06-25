@@ -27,11 +27,10 @@ public class BriberyTaskInfoData extends PersistentState {
      * @param task 任务
      */
     public void submitTask(UUID officialId, BriberyTaskInfo task) {
+
         try {
             lock1.lock();
-            log.info("t{}", task);
             List<BriberyTaskInfo> briberyTaskInfos = officialTask.get(officialId);
-            log.info("l{}", briberyTaskInfos);
             if(briberyTaskInfos == null){
                 briberyTaskInfos = new CopyOnWriteArrayList<>();
             }
@@ -42,7 +41,6 @@ public class BriberyTaskInfoData extends PersistentState {
         } finally {
             lock1.unlock();
         }
-        log.info("{}", officialTask);
         markDirty();
     }
 
@@ -97,7 +95,7 @@ public class BriberyTaskInfoData extends PersistentState {
         BriberyTaskInfoData state = new BriberyTaskInfoData();
         NbtCompound rolesNbt = nbt.getCompound("official_task_info_map");
         rolesNbt.getKeys().forEach(key -> {
-            List<BriberyTaskInfo> taskNbtList = new ArrayList<>();
+            List<BriberyTaskInfo> taskNbtList = new CopyOnWriteArrayList<>();
             NbtList taskNbt = rolesNbt.getList(key, NbtElement.COMPOUND_TYPE);
             taskNbt.forEach(taskNbtElement -> taskNbtList.add(BriberyTaskInfo.fromNbt((NbtCompound) taskNbtElement)));
              state. officialTask.put( UUID.fromString(key), taskNbtList);

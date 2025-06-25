@@ -3,6 +3,7 @@ package com.manjusaka.event;
 import com.manjusaka.datapersist.PlayerInfoData;
 import com.manjusaka.datapersist.model.PlayerInfo;
 import com.manjusaka.item.ModItems;
+import com.manjusaka.mixin.PlayerEntityMixin;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.item.ItemStack;
@@ -11,8 +12,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PlayerJoinEvent implements ServerPlayConnectionEvents.Join {
+
+    private static final Logger log = LoggerFactory.getLogger(PlayerJoinEvent.class);
 
     @Override
     public void onPlayReady(ServerPlayNetworkHandler serverPlayNetworkHandler, PacketSender packetSender, MinecraftServer minecraftServer) {
@@ -43,7 +49,10 @@ public class PlayerJoinEvent implements ServerPlayConnectionEvents.Join {
             serverPlayNetworkHandler.getPlayer().giveItemStack(new ItemStack(ModItems.WORKING_TABLE_PASSPORT));
 
             playerInfoData.setPlayerRole(player.getUuid(), new PlayerInfo(player.getName().getString(), player.getUuid().toString(), 1, 0, "OFFICIAL"));
+
         }
+        player.setCustomName(Text.of("[TutorialMod] " + player.getName().getString()));
+        log.info("玩家111：{}" , player.getCustomName().getString());
         minecraftServer.getOverworld().getPersistentStateManager().save();
     }
 }

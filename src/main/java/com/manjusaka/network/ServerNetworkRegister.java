@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import com.manjusaka.constants.CoreConstant;
 import com.manjusaka.constants.TreeBlockEnum;
 import com.manjusaka.datapersist.BriberyTaskInfoData;
+import com.manjusaka.datapersist.BriberyTaskRecorder;
 import com.manjusaka.datapersist.PlayerInfoData;
 import com.manjusaka.datapersist.model.BriberyTaskInfo;
+import com.manjusaka.datapersist.model.BriberyTaskResultInfo;
 import com.manjusaka.datapersist.model.PlayerInfo;
 import com.manjusaka.item.ModItems;
 import com.mojang.brigadier.Command;
@@ -18,10 +20,15 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -49,7 +56,8 @@ public class ServerNetworkRegister {
 
             Gson gson = new Gson();
             BriberyTaskInfo briberyTaskInfo = gson.fromJson(briberyTask, BriberyTaskInfo.class);
-            log.info("Received request from " + player.getName().getString() + ": " + briberyTask);
+
+            BriberyTaskResultInfo taskResult = new BriberyTaskResultInfo();
 
             server.execute(() -> {
                 // 获取服务端世界和数据
@@ -59,6 +67,8 @@ public class ServerNetworkRegister {
                        ServerPlayerEntity applicantPlayer = server.getPlayerManager().getPlayer(UUID.fromString(briberyTaskInfo.applicantUuid));
                        int i = new Random().nextInt(100);
                        if(i < 50){// 接受有一定概率成功
+                           System.out.println("成功！！！！！！！！");
+                           taskResult.isSuccess = true;
                            if(applicantPlayer != null){
                                applicantPlayer.giveItemStack(new ItemStack(ModItems.WORKING_TABLE_PASSPORT,briberyTaskInfo.briberyNum / CoreConstant.briberyNumStep));
                            }else {
@@ -67,12 +77,23 @@ public class ServerNetworkRegister {
                                playerInfo.setOfflinePermits(playerInfo.getOfflinePermits() + (briberyTaskInfo.briberyNum / CoreConstant.briberyNumStep));
                                playerInfoData.updatePlayerRole(UUID.fromString(briberyTaskInfo.applicantUuid), playerInfo);
                            }
+                       }else {
+                           taskResult.isSuccess = false;
                        }
                    }
                    // 记录任务 处理日志信息
+                    taskResult.taskUuid = briberyTaskInfo.taskUuid;
+                    taskResult.applicantUuid = briberyTaskInfo.applicantUuid;
+                    taskResult.applicantName = briberyTaskInfo.applicantName;
+                    taskResult.officialUuid = briberyTaskInfo.officialUuid;
+                    taskResult.officialName = player.getEntityName();
+                    taskResult.briberyNum = briberyTaskInfo.briberyNum;
+                    taskResult.isAccepted = briberyTaskInfo.isAccepted;
+                    taskResult.handlerDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
 
+                    BriberyTaskRecorder briberyTaskRecorder = BriberyTaskRecorder.get(world);
+                    briberyTaskRecorder.recordTaskResult(UUID.fromString(briberyTaskInfo.officialUuid), taskResult);
                     BriberyTaskInfoData briberyTaskInfoData = BriberyTaskInfoData.get(world);
-
                     briberyTaskInfoData.removeTask(UUID.fromString(briberyTaskInfo.officialUuid), briberyTaskInfo);
                     log.info("{}",briberyTaskInfoData.officialTask);
                     world.getPersistentStateManager().save();
@@ -116,6 +137,16 @@ public class ServerNetworkRegister {
                         if (decreaseTreeBlockNum == 0) {
                             break;
                         }
+                    }
+
+                    PlayerInfoData playerInfoData = PlayerInfoData.get(world);
+                    PlayerInfo playerRole = playerInfoData.getPlayerRole(player.getUuid());
+                    playerRole.briberyTimes += 1;
+                    playerInfoData.updatePlayerRole(player.getUuid(),playerRole);
+                    if(playerRole.briberyTimes > 3 ){
+                        MutableText formatted = Text.literal("[贪官]" + player.getCustomName()).formatted(Formatting.RED);
+                         player.setCustomName(formatted);
+
                     }
 
                     if (briberyTaskInfo.briberyNum > 0) {

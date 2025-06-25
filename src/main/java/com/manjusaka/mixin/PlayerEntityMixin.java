@@ -8,6 +8,10 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,10 +20,26 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Objects;
+
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin {
 
     private static final Logger log = LoggerFactory.getLogger(PlayerEntityMixin.class);
+
+    @Inject(method = "getDisplayName", at = @At("HEAD"), cancellable = true)
+    private void getDisplayName(CallbackInfoReturnable<Text> cir) {
+        PlayerEntity player = (PlayerEntity) (Object) this;
+//        if(player.getCustomName() != null){
+//            String name = player.getCustomName().getString();
+//           // 匹配第一个 -
+////            if("bribery".equals(name.split("-")[0])){
+////                MutableText formatted = Text.literal("[贪官]" + player.getCustomName()).formatted(Formatting.RED);
+////                cir.setReturnValue(formatted);
+////            }
+//        }
+        cir.setReturnValue(player.getCustomName());
+    }
 
     /**
      *  阻止玩家丢弃工作台通行证

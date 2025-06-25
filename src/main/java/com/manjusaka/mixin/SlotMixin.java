@@ -38,7 +38,6 @@ public abstract class SlotMixin {
             boolean compositeFlag = false;
             // 获取当前玩家所有背包的物品
             for (Slot slot : player.currentScreenHandler.slots) {
-                System.out.println("@@@槽位：" + slot.getIndex() + ", 物品："+ slot.getStack().getItem().getName().getString() + "--------" + Registries.ITEM.getId(slot.getStack().getItem()).toString());
                 if("tutorial-mod:working_table_passport".equals(Registries.ITEM.getId(slot.getStack().getItem()).toString())){
                     // 物品数量减1
                     slot.getStack().decrement(1);

@@ -6,6 +6,7 @@ import com.manjusaka.datapersist.BriberyTaskInfoData;
 import com.manjusaka.datapersist.PlayerInfoData;
 
 import com.manjusaka.datapersist.model.BriberyTaskInfo;
+import com.manjusaka.datapersist.model.PlayerInfo;
 import com.manjusaka.event.EventRegister;
 import com.manjusaka.item.ModItemGroups;
 import com.manjusaka.item.ModItems;
@@ -16,10 +17,12 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -81,15 +84,16 @@ public class TutorialMod implements ModInitializer {
                     }));
         });
 
+
+
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             dispatcher.register(
-                    CommandManager.literal("addNBTData").executes(context -> {
+                    CommandManager.literal("getWood").executes(context -> {
                         ServerWorld world = context.getSource().getWorld();
-                        BriberyTaskInfoData briberyTaskInfoData = BriberyTaskInfoData.get(world);
 
                         ServerPlayerEntity player = context.getSource().getPlayer();
                         assert player != null;
-                            world.getPersistentStateManager().save();
+                            player.giveItemStack(new ItemStack(Items.OAK_LOG,20));
                         return Command.SINGLE_SUCCESS;
                     }));
         });
