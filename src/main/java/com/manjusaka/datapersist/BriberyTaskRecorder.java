@@ -45,7 +45,6 @@ public class BriberyTaskRecorder extends PersistentState {
             }
             briberyTaskResultInfos.add(taskResult);
             officialTaskRecorderMap.put(officialId, briberyTaskResultInfos);
-            log.info("{}", officialTaskRecorderMap);
         } finally {
             lock1.unlock();
         }

@@ -61,9 +61,9 @@ public class BriberyApplyDetailScreen extends Screen {
                 ItemStack itemStack = inventory.getStack(i);
 
                 if (!itemStack.isEmpty()) {
-                    String itemName = itemStack.getItem().getName().getString();
+//                    String itemName = itemStack.getItem().getName().getString();
                     int itemCount = itemStack.getCount();
-                    System.out.println("槽位" + i + "物品名称：" + itemName + " 数量：" + itemCount);
+//                    System.out.println("槽位" + i + "物品名称：" + itemName + " 数量：" + itemCount);
 
                     if (allTreeBlocks.contains(Registries.ITEM.getId(itemStack.getItem()).toString())) {
                         briberyMaxNum += itemCount;

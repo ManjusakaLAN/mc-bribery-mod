@@ -30,15 +30,7 @@ public abstract class PlayerEntityMixin {
     @Inject(method = "getDisplayName", at = @At("HEAD"), cancellable = true)
     private void getDisplayName(CallbackInfoReturnable<Text> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
-//        if(player.getCustomName() != null){
-//            String name = player.getCustomName().getString();
-//           // 匹配第一个 -
-////            if("bribery".equals(name.split("-")[0])){
-////                MutableText formatted = Text.literal("[贪官]" + player.getCustomName()).formatted(Formatting.RED);
-////                cir.setReturnValue(formatted);
-////            }
-//        }
-        cir.setReturnValue(player.getCustomName());
+        cir.setReturnValue(player.getCustomName() == null ? player.getName() : player.getCustomName());
     }
 
     /**

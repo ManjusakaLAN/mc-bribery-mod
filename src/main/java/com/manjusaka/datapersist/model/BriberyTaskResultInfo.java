@@ -31,6 +31,8 @@ public class BriberyTaskResultInfo {
 
     // 任务处理时间
     public String handlerDate;
+    // 贿赂系数
+    public int rate;
 
 
     public BriberyTaskResultInfo() {
@@ -49,6 +51,7 @@ public class BriberyTaskResultInfo {
         nbt.putInt("successRatio", this.successRatio);
         nbt.putBoolean("isSuccess", this.isSuccess);
         nbt.putString("handlerDate", this.handlerDate);
+        nbt.putInt("rate", this.rate);
         return nbt;
     }
 
@@ -64,6 +67,7 @@ public class BriberyTaskResultInfo {
         info.successRatio = nbt.getInt("successRatio");
         info.isSuccess = nbt.getBoolean("isSuccess");
         info.handlerDate = nbt.getString("handlerDate");
+        info.rate = nbt.getInt("rate");
         return info;
     }
 }

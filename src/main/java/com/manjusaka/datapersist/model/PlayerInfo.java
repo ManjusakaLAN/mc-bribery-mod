@@ -14,10 +14,16 @@ public class PlayerInfo {
     public int lastLevelCardGet;
     // 离线时 得到的许可证实例
     public int offlinePermits;
-
+    // 角色
     public String role;
     // 贿赂次数
     public int briberyTimes;
+    // 是否成为过官员
+    public int usedToBeOfficial;
+
+    public int stageOneBriberyTimes;
+    public int stageTwoBriberyTimes;
+    public int stageThreeBriberyTimes;
     public PlayerInfo() {
     }
 
@@ -29,6 +35,10 @@ public class PlayerInfo {
         this.role = role;
         this.offlinePermits = 0;
         this.briberyTimes = 0;
+        this.usedToBeOfficial = 0;
+        this.stageOneBriberyTimes = 0;
+        this.stageTwoBriberyTimes = 0;
+        this.stageThreeBriberyTimes = 0;
     }
 
 
@@ -90,6 +100,10 @@ public class PlayerInfo {
         nbt.putString("role", this.role);
         nbt.putInt("offlinePermits", this.offlinePermits);
         nbt.putInt("briberyTimes", this.briberyTimes);
+        nbt.putInt("usedToBeOfficial", this.usedToBeOfficial);
+        nbt.putInt("stageOneBriberyTimes", this.stageOneBriberyTimes);
+        nbt.putInt("stageTwoBriberyTimes", this.stageTwoBriberyTimes);
+        nbt.putInt("stageThreeBriberyTimes", this.stageThreeBriberyTimes);
         return nbt;
     }
 
@@ -103,6 +117,10 @@ public class PlayerInfo {
         info.role = nbt.getString("role");
         info.offlinePermits = nbt.getInt("offlinePermits");
         info.briberyTimes = nbt.getInt("briberyTimes");
+        info.usedToBeOfficial = nbt.getInt("usedToBeOfficial");
+        info.stageOneBriberyTimes = nbt.getInt("stageOneBriberyTimes");
+        info.stageTwoBriberyTimes = nbt.getInt("stageTwoBriberyTimes");
+        info.stageThreeBriberyTimes = nbt.getInt("stageThreeBriberyTimes");
         return info;
     }
 }

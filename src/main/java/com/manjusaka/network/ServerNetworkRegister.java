@@ -6,23 +6,19 @@ import com.manjusaka.constants.TreeBlockEnum;
 import com.manjusaka.datapersist.BriberyTaskInfoData;
 import com.manjusaka.datapersist.BriberyTaskRecorder;
 import com.manjusaka.datapersist.PlayerInfoData;
+import com.manjusaka.datapersist.WorldProperties;
 import com.manjusaka.datapersist.model.BriberyTaskInfo;
 import com.manjusaka.datapersist.model.BriberyTaskResultInfo;
 import com.manjusaka.datapersist.model.PlayerInfo;
 import com.manjusaka.item.ModItems;
-import com.mojang.brigadier.Command;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,12 +58,13 @@ public class ServerNetworkRegister {
             server.execute(() -> {
                 // 获取服务端世界和数据
                 ServerWorld world = server.getWorld(World.OVERWORLD);
+                int rate = 0;
                 if(world != null){
                    if(briberyTaskInfo.isAccepted){
                        ServerPlayerEntity applicantPlayer = server.getPlayerManager().getPlayer(UUID.fromString(briberyTaskInfo.applicantUuid));
                        int i = new Random().nextInt(100);
-                       if(i < 50){// 接受有一定概率成功
-                           System.out.println("成功！！！！！！！！");
+                       rate = WorldProperties.get(world).getBriberySuccessfulRate();
+                       if(i < rate){// 接受有一定概率成功
                            taskResult.isSuccess = true;
                            if(applicantPlayer != null){
                                applicantPlayer.giveItemStack(new ItemStack(ModItems.WORKING_TABLE_PASSPORT,briberyTaskInfo.briberyNum / CoreConstant.briberyNumStep));
@@ -80,6 +77,9 @@ public class ServerNetworkRegister {
                        }else {
                            taskResult.isSuccess = false;
                        }
+                   }else {
+                       // 被拒绝那么此次任务一定失败
+                       taskResult.isSuccess = false;
                    }
                    // 记录任务 处理日志信息
                     taskResult.taskUuid = briberyTaskInfo.taskUuid;
@@ -89,13 +89,13 @@ public class ServerNetworkRegister {
                     taskResult.officialName = player.getEntityName();
                     taskResult.briberyNum = briberyTaskInfo.briberyNum;
                     taskResult.isAccepted = briberyTaskInfo.isAccepted;
+                    taskResult.rate = rate;
                     taskResult.handlerDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
 
                     BriberyTaskRecorder briberyTaskRecorder = BriberyTaskRecorder.get(world);
                     briberyTaskRecorder.recordTaskResult(UUID.fromString(briberyTaskInfo.officialUuid), taskResult);
                     BriberyTaskInfoData briberyTaskInfoData = BriberyTaskInfoData.get(world);
                     briberyTaskInfoData.removeTask(UUID.fromString(briberyTaskInfo.officialUuid), briberyTaskInfo);
-                    log.info("{}",briberyTaskInfoData.officialTask);
                     world.getPersistentStateManager().save();
                 }
 
@@ -122,13 +122,14 @@ public class ServerNetworkRegister {
                     for (int i = 0; i < 36; i++) {
                         ItemStack itemStack = inventory.getStack(i);
                         if (!itemStack.isEmpty()) {
-                            String itemName = itemStack.getItem().getName().getString();
                             int itemCount = itemStack.getCount();
                             if (allTreeBlocks.contains(Registries.ITEM.getId(itemStack.getItem()).toString())) {
-                                // 数量小于需要减少的数量
+                                // 当前格子的数量 >= 需要减少的数量
                                 if (decreaseTreeBlockNum <= itemCount) {
                                     itemStack.decrement(decreaseTreeBlockNum);
+                                    decreaseTreeBlockNum = 0;
                                 } else {
+                                    // 当前格子的数量 < 需要减少的数量
                                     itemStack.decrement(itemCount);
                                     decreaseTreeBlockNum -= itemCount;
                                 }
@@ -139,17 +140,22 @@ public class ServerNetworkRegister {
                         }
                     }
 
-                    PlayerInfoData playerInfoData = PlayerInfoData.get(world);
-                    PlayerInfo playerRole = playerInfoData.getPlayerRole(player.getUuid());
-                    playerRole.briberyTimes += 1;
-                    playerInfoData.updatePlayerRole(player.getUuid(),playerRole);
-                    if(playerRole.briberyTimes > 3 ){
-                        MutableText formatted = Text.literal("[贪官]" + player.getCustomName()).formatted(Formatting.RED);
-                         player.setCustomName(formatted);
-
-                    }
-
                     if (briberyTaskInfo.briberyNum > 0) {
+
+                        PlayerInfoData playerInfoData = PlayerInfoData.get(world);
+                        PlayerInfo playerRole = playerInfoData.getPlayerRole(player.getUuid());
+                        playerRole.briberyTimes += 1;
+
+                        WorldProperties worldProperties = WorldProperties.get(world);
+                        if(1 == worldProperties.getStage()){
+                            playerRole.stageOneBriberyTimes +=1;
+                        }else if (2 == worldProperties.getStage()){
+                            playerRole.stageTwoBriberyTimes +=1;
+                        }else {
+                            playerRole.stageThreeBriberyTimes +=1;
+                        }
+                        playerInfoData.updatePlayerRole(player.getUuid(),playerRole);
+
                         BriberyTaskInfoData briberyTaskInfoData = BriberyTaskInfoData.get(world);
                         briberyTaskInfoData.submitTask(UUID.fromString(briberyTaskInfo.officialUuid), briberyTaskInfo);
                         world.getPersistentStateManager().save();

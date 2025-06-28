@@ -32,6 +32,8 @@ public class PlayerInfoData extends PersistentState {
     }
 
 
+
+
     @Override
     public NbtCompound writeNbt(NbtCompound nbt) {
         NbtCompound rolesNbt = new NbtCompound();
