@@ -15,6 +15,10 @@ public class WorldProperties extends PersistentState {
     public  int stage;
     // 是否完成了一整伦的角色分配
     public int assignThreshold;
+    // 分配官员的数量
+    public int assignNum;
+
+    public int woodCmdPermit;
 
     public int getBriberySuccessfulRate() {
         return briberySuccessfulRate;
@@ -24,6 +28,8 @@ public class WorldProperties extends PersistentState {
         this.briberySuccessfulRate = 90;
         this.stage = 1;
         this.assignThreshold = 1;
+        this.assignNum = 10;
+        this.woodCmdPermit = 0;
         markDirty();
     }
 
@@ -50,13 +56,34 @@ public class WorldProperties extends PersistentState {
         markDirty();
     }
 
+    public int getAssignNum() {
+        return assignNum;
+    }
+
+    public void setAssignNum(int assignNum) {
+        this.assignNum = assignNum;
+        markDirty();
+    }
+
+    public int getWoodCmdPermit() {
+        return woodCmdPermit;
+    }
+
+    public void setWoodCmdPermit(int woodCmdPermit) {
+        this.woodCmdPermit = woodCmdPermit;
+        markDirty();
+    }
+
     @Override
     public NbtCompound writeNbt(NbtCompound nbt) {
         NbtCompound worldNbt = new NbtCompound();
         worldNbt.putInt("briberySuccessfulRate", briberySuccessfulRate);
         worldNbt.putInt("stage", stage);
         worldNbt.putInt("assignThreshold", assignThreshold);
+        worldNbt.putInt("assignNum", assignNum);
+        worldNbt.putInt("woodCmdPermit", woodCmdPermit);
         nbt.put("word_properties", worldNbt);
+
         return nbt;
     }
 
@@ -73,6 +100,12 @@ public class WorldProperties extends PersistentState {
                     }
                     if (key.equals("assignThreshold")){
                         worldProperties.assignThreshold = wordProperties.getInt(key);
+                    }
+                    if (key.equals("assignNum")){
+                        worldProperties.assignNum = wordProperties.getInt(key);
+                    }
+                    if (key.equals("woodCmdPermit")){
+                        worldProperties.woodCmdPermit = wordProperties.getInt(key);
                     }
                 }
                 );

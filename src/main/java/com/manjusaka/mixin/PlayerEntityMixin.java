@@ -40,7 +40,7 @@ public abstract class PlayerEntityMixin {
      * @param retainOwnership 是否保留物品
      * @param cir 回调信息 可取消事件
      */
-    @Inject(method = "dropItem*", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "dropItem(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/ItemEntity;", at = @At("HEAD"), cancellable = true)
     private void onDropItem(ItemStack stack, boolean throwRandomly, boolean retainOwnership, CallbackInfoReturnable<ItemEntity> cir) {
         PlayerEntity player = (PlayerEntity) (Object) this;
         if ("tutorial-mod:working_table_passport".equals(Registries.ITEM.getId(stack.getItem()).toString()) && player.isAlive()) {

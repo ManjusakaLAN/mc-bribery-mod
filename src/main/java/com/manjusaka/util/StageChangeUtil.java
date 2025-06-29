@@ -29,6 +29,8 @@ public class StageChangeUtil {
                 player.setCustomName(Text.literal("[清风拂面]" + playerName).formatted(Formatting.GREEN));
             }else if (playerInfo.stageOneBriberyTimes > 15){
                 player.setCustomName(Text.literal("[贪婪之手]" +playerName).formatted(Formatting.RED));
+            }else {
+                player.setCustomName(Text.literal(playerName).formatted(Formatting.WHITE));
             }
         }else {
             if (playerInfo.stageOneBriberyTimes == 0 && playerInfo.stageTwoBriberyTimes == 0){

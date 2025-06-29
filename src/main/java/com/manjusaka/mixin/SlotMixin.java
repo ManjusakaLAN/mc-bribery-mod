@@ -32,9 +32,7 @@ public abstract class SlotMixin {
     private void onTakeItem(PlayerEntity player, ItemStack stack, CallbackInfo ci) {
 
         //判断当前玩家是否打开的是合成台页面
-        if (!(this.player.currentScreenHandler instanceof CraftingScreenHandler)) {
-            System.out.println("玩家没有打开合成台页面！");
-        }else {
+        if (this.player.currentScreenHandler instanceof CraftingScreenHandler) {
             boolean compositeFlag = false;
             // 获取当前玩家所有背包的物品
             for (Slot slot : player.currentScreenHandler.slots) {
@@ -51,8 +49,7 @@ public abstract class SlotMixin {
 
             if(!compositeFlag){
                 // 取消合成
-                System.out.println("物品数量不足");
-                player.sendMessage(Text.literal("物品数量不足"));
+                player.sendMessage(Text.literal("合成许可证物品数量不足"));
                 stack.setCount(0);
                 ci.cancel();
             }
